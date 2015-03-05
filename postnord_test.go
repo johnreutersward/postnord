@@ -8,7 +8,6 @@ import (
 var t1 = `
 <?xml version="1.0" encoding="UTF-8" ?>
 <TrackingInformationResponse>
-	<lard>aaaaAAAA</lard>
 	<shipments>
 		<Shipment>
 			<shipmentId>RG136027285CN</shipmentId>
@@ -32,8 +31,8 @@ var t1 = `
 					<noItems>1</noItems>
 					<status>DELIVERED</status>
 					<statusText>
-					<header>Försändelsen är utlämnad till mottagaren</header>
-					<body>Försändelsen lämnades ut 2015-03-03 kl 17:10</body>
+						<header>Försändelsen är utlämnad till mottagaren</header>
+						<body>Försändelsen lämnades ut 2015-03-03 kl 17:10</body>
 					</statusText>
 					<events>
 						<TrackingEvent>
@@ -114,5 +113,14 @@ func Test_xmlDecode(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
 	t.Logf("%+v", s)
+
+	if s.Shipments[0].ShipmentId != "RG136027285CN" {
+		t.Fail()
+	}
+
+	if len(s.Shipments) < 1 {
+		t.Fail()
+	}
 }

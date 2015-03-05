@@ -45,11 +45,10 @@ func NewClient(ConsumerID string, httpClient *http.Client) *Client {
 
 type shipmentResponse struct {
 	Shipments []Shipment `xml:"shipments>Shipment"`
-	Lard      string     `xml:"lard"`
 }
 
 type Shipment struct {
-	ID               string `xml:"shipmentId"`
+	ShipmentId       string `xml:"shipmentId"`
 	URI              string `xml:"uri"`
 	AssertedNumitems int    `xml:"assessedNumberOfItems"`
 
@@ -67,7 +66,28 @@ type Shipment struct {
 	} `xml:"statusText"`
 
 	Items []struct {
-		ItemId string `xml:"itemId"`
+		ItemId       string `xml:"itemId"`
+		DeliveryDate string `xml:"deliveryDate"`
+		NoItems      int    `xml:"noItems"`
+		Status       string `xml:"status"`
+		StatusText   struct {
+			Header string `xml:"header"`
+			Body   string `xml:"body"`
+		} `xml:"statusText"`
+		TrackingEvents []struct {
+			EventTime        string `xml:"eventTime"`
+			EventCode        string `xml:"eventCode"`
+			EventDescription string `xml:"eventDescription"`
+			Location         struct {
+				LocationId   string `xml:"locationId"`
+				DisplayName  string `xml:"displayName"`
+				Name         string `xml:"name"`
+				LocationType string `xml:"locationType"`
+			} `xml:"location"`
+		} `xml:"events>TrackingEvent"`
+		References string `xml:"references"`
+		ItemRefIds string `xml:"itemRefIds"`
+		FreeTexts  string `xml:"freeTexts"`
 	} `xml:"items>Item"`
 
 	Status             string `xml:"status"`
@@ -89,7 +109,11 @@ func (c *Client) Shipment(ID string) (*Shipment, error) {
 		return nil, err
 	}
 
-	return nil, nil
+	if len(v.Shipments) == 0 {
+		return nil, fmt.Errorf("Shipment not found")
+	}
+
+	return &v.Shipments[0], nil
 }
 
 func (c *Client) get(endp string, vals url.Values, v interface{}) (*http.Response, error) {
