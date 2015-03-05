@@ -5,7 +5,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"net/http"
-	"net/http/httputil"
 	"net/url"
 )
 
@@ -137,26 +136,10 @@ func (c *Client) get(endp string, vals url.Values, v interface{}) (*http.Respons
 
 	req.Header.Set("User-Agent", c.UserAgent)
 
-	// debug
-	dump, err := httputil.DumpRequestOut(req, false)
-	if err != nil {
-		return nil, err
-	}
-
-	fmt.Println(string(dump[:]))
-
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
-
-	// debug
-	dump, err = httputil.DumpResponse(resp, true)
-	if err != nil {
-		return nil, err
-	}
-
-	fmt.Println(string(dump[:]))
 
 	if resp.StatusCode > 299 {
 		return nil, fmt.Errorf("api error HTTP %d", resp.StatusCode)
