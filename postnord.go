@@ -43,12 +43,37 @@ func NewClient(ConsumerID string, httpClient *http.Client) *Client {
 	return c
 }
 
-type TrackingInformationResponse struct {
-	shipments []Shipment `xml:"shipments"`
+type shipmentResponse struct {
+	Shipments []Shipment `xml:"shipments>Shipment"`
+	Lard      string     `xml:"lard"`
 }
 
 type Shipment struct {
-	ID string `xml:"shipmentId"`
+	ID               string `xml:"shipmentId"`
+	URI              string `xml:"uri"`
+	AssertedNumitems int    `xml:"assessedNumberOfItems"`
+
+	Service struct {
+		Code string `xml:"code"`
+		Name string `xml:"name"`
+	} `xml:"service"`
+
+	Consignee struct {
+		Address string `xml:"address"`
+	} `xml:"consignee"`
+
+	StatusText struct {
+		Header string `xml:"header"`
+	} `xml:"statusText"`
+
+	Items []struct {
+		ItemId string `xml:"itemId"`
+	} `xml:"items>Item"`
+
+	Status             string `xml:"status"`
+	AdditionalServices string `xml:"additionalServices"`
+	SplitStatuses      string `xml:"splitStatuses"`
+	ShipmentReferences string `xml:"shipmentReferences"`
 }
 
 func (c *Client) Shipment(ID string) (*Shipment, error) {
@@ -57,14 +82,12 @@ func (c *Client) Shipment(ID string) (*Shipment, error) {
 	vals := url.Values{}
 	vals.Set("id", ID)
 
-	v := new(TrackingInformationResponse)
+	v := &shipmentResponse{}
 
 	_, err := c.get(endp, vals, v)
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Printf("%v", v)
 
 	return nil, nil
 }
